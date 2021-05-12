@@ -43,43 +43,52 @@ namespace UI
                 {
                     case "L":
                         ToonLijstVanLanden();
+
                         break;
                 }
             }
+
             Console.Clear();
         }
 
         public static void ToonLijstVanLanden()
         {
-            using var context = new EFLandenContext();
-
-            var landen = (from land in context.Landen
-                          orderby land.Naam
-                          select land).ToList();
-
-            if (landen != null)
+            try
             {
-                Console.WriteLine("----------------");
-                Console.WriteLine("Lijst van Landen");
-                Console.WriteLine("----------------");
+                using var context = new EFLandenContext();
 
-                foreach (var land in landen)
+                var landen = (from land in context.Landen
+                              orderby land.Naam
+                              select land).ToList();
+
+                if (landen != null)
                 {
-                    Console.WriteLine("{0}\t{1,-20}\t{2,20}\t{3,15}", land.ISOLandCode, land.Naam, land.AantalInwoners, land.Oppervlakte);
+                    Console.WriteLine("----------------");
+                    Console.WriteLine("Lijst van Landen");
+                    Console.WriteLine("----------------");
+
+                    foreach (var land in landen)
+                    {
+                        Console.WriteLine("{0}\t{1,-20}\t{2,20}\t{3,15}", land.ISOLandCode, land.Naam, land.AantalInwoners, land.Oppervlakte);
+                    }
+                }
+
+                Console.WriteLine();
+                Console.WriteLine("Geef een landcode in : ");
+                string landcode = Console.ReadLine().ToUpper();
+
+                if (landcode != null)
+                {
+                    KiesLandDoorLandcode(landcode);
+                }
+                else
+                {
+                    Console.WriteLine("Geef een geldig Landcode in");
                 }
             }
-
-            Console.WriteLine();
-            Console.WriteLine("Geef een landcode in : ");
-            string landcode = Console.ReadLine().ToUpper();
-
-            if (landcode != null)
+            catch(FormatException)
             {
-                KiesLandDoorLandcode(landcode);
-            }
-            else
-            {
-                Console.WriteLine("Geef een geldig Landcode in");
+                Console.WriteLine("Database is niet gevonden");
             }
         }
 
@@ -289,11 +298,11 @@ namespace UI
                 }
 
                 Console.WriteLine("Geef het volgnummer uit de lijst : ");
-                if(int.TryParse(Console.ReadLine(), out int stadId))
+                if (int.TryParse(Console.ReadLine(), out int stadId))
                 {
                     var stad = context.Steden.Find(stadId);
 
-                    if(stad.ISOLandCode == landcode)
+                    if (stad != null && stad.ISOLandCode == landcode)
                     {
                         context.Steden.Remove(stad);
                         context.SaveChanges();
