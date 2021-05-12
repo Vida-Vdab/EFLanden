@@ -13,39 +13,45 @@ namespace UI
         {
             string input = "LX";
             var keuze = "";
-
-            while (keuze != "X")
+            try
             {
-                Console.ForegroundColor = ConsoleColor.Blue;
-                Console.WriteLine();
-                Console.WriteLine($"=================");
-                Console.WriteLine($"Landen, Steden en Talen");
-                Console.WriteLine($"=================");
-                Console.WriteLine();
-
-                Console.WriteLine("--------");
-                Console.WriteLine("M E N U - Geen land gekozen");
-                Console.WriteLine("--------");
-                Console.WriteLine("Lijst <L>anden");
-                Console.WriteLine("e<X>it");
-                Console.WriteLine();
-
-                Console.Write("\tGeef uw keuze (LX)* : ");
-                keuze = Console.ReadLine().ToUpper();
-
-                while (!input.Contains(keuze))
+                while (keuze != "X")
                 {
-                    Console.Write("Geef uw keuze: ");
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                    Console.WriteLine();
+                    Console.WriteLine($"=================");
+                    Console.WriteLine($"Landen, Steden en Talen");
+                    Console.WriteLine($"=================");
+                    Console.WriteLine();
+
+                    Console.WriteLine("--------");
+                    Console.WriteLine("M E N U - Geen land gekozen");
+                    Console.WriteLine("--------");
+                    Console.WriteLine("Lijst <L>anden");
+                    Console.WriteLine("e<X>it");
+                    Console.WriteLine();
+
+                    Console.Write("\tGeef uw keuze (LX)* : ");
                     keuze = Console.ReadLine().ToUpper();
-                }
 
-                switch (keuze)
-                {
-                    case "L":
-                        ToonLijstVanLanden();
+                    while (!input.Contains(keuze))
+                    {
+                        Console.Write("Geef uw keuze: ");
+                        keuze = Console.ReadLine().ToUpper();
+                    }
 
-                        break;
+                    switch (keuze)
+                    {
+                        case "L":
+                            ToonLijstVanLanden();
+
+                            break;
+                    }
                 }
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine("Database is niet gevonden");
             }
 
             Console.Clear();
@@ -53,43 +59,37 @@ namespace UI
 
         public static void ToonLijstVanLanden()
         {
-            try
+            using var context = new EFLandenContext();
+
+            var landen = (from land in context.Landen
+                          orderby land.Naam
+                          select land).ToList();
+
+            if (landen != null)
             {
-                using var context = new EFLandenContext();
+                Console.WriteLine("----------------");
+                Console.WriteLine("Lijst van Landen");
+                Console.WriteLine("----------------");
 
-                var landen = (from land in context.Landen
-                              orderby land.Naam
-                              select land).ToList();
-
-                if (landen != null)
+                foreach (var land in landen)
                 {
-                    Console.WriteLine("----------------");
-                    Console.WriteLine("Lijst van Landen");
-                    Console.WriteLine("----------------");
-
-                    foreach (var land in landen)
-                    {
-                        Console.WriteLine("{0}\t{1,-20}\t{2,20}\t{3,15}", land.ISOLandCode, land.Naam, land.AantalInwoners, land.Oppervlakte);
-                    }
-                }
-
-                Console.WriteLine();
-                Console.WriteLine("Geef een landcode in : ");
-                string landcode = Console.ReadLine().ToUpper();
-
-                if (landcode != null)
-                {
-                    KiesLandDoorLandcode(landcode);
-                }
-                else
-                {
-                    Console.WriteLine("Geef een geldig Landcode in");
+                    Console.WriteLine("{0}\t{1,-20}\t{2,20}\t{3,15}", land.ISOLandCode, land.Naam, land.AantalInwoners, land.Oppervlakte);
                 }
             }
-            catch(FormatException)
+
+            Console.WriteLine();
+            Console.WriteLine("Geef een landcode in : ");
+            string landcode = Console.ReadLine().ToUpper();
+
+            if (landcode != null)
             {
-                Console.WriteLine("Database is niet gevonden");
+                KiesLandDoorLandcode(landcode);
             }
+            else
+            {
+                Console.WriteLine("Geef een geldig Landcode in");
+            }
+
         }
 
         public static void KiesLandDoorLandcode(string landcode)
