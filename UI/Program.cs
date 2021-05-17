@@ -3,7 +3,7 @@ using Model.Repositories;
 using System.Linq;
 using Model.Entities;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.Data.SqlClient;
 
 namespace UI
 {
@@ -13,308 +13,377 @@ namespace UI
         {
             string input = "LX";
             var keuze = "";
-            try
+            //try
+            //{
+            //    using var context = new EFLandenContext();
+            while (keuze != "X")
             {
-                while (keuze != "X")
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.WriteLine();
+                Console.WriteLine($"=================");
+                Console.WriteLine($"Landen, Steden en Talen");
+                Console.WriteLine($"=================");
+                Console.WriteLine();
+
+                Console.WriteLine("--------");
+                Console.WriteLine("M E N U - Geen land gekozen");
+                Console.WriteLine("--------");
+                Console.WriteLine("Lijst <L>anden");
+                Console.WriteLine("e<X>it");
+                Console.WriteLine();
+
+                Console.Write("\tGeef uw keuze (LX)* : ");
+                keuze = Console.ReadLine().ToUpper();
+
+                while (!input.Contains(keuze))
                 {
-                    Console.ForegroundColor = ConsoleColor.Blue;
-                    Console.WriteLine();
-                    Console.WriteLine($"=================");
-                    Console.WriteLine($"Landen, Steden en Talen");
-                    Console.WriteLine($"=================");
-                    Console.WriteLine();
-
-                    Console.WriteLine("--------");
-                    Console.WriteLine("M E N U - Geen land gekozen");
-                    Console.WriteLine("--------");
-                    Console.WriteLine("Lijst <L>anden");
-                    Console.WriteLine("e<X>it");
-                    Console.WriteLine();
-
-                    Console.Write("\tGeef uw keuze (LX)* : ");
+                    Console.Write("Geef uw keuze: ");
                     keuze = Console.ReadLine().ToUpper();
-
-                    while (!input.Contains(keuze))
-                    {
-                        Console.Write("Geef uw keuze: ");
-                        keuze = Console.ReadLine().ToUpper();
-                    }
-
-                    switch (keuze)
-                    {
-                        case "L":
-                            ToonLijstVanLanden();
-
-                            break;
-                    }
                 }
-            }
-            catch (FormatException)
-            {
-                Console.WriteLine("Database is niet gevonden");
+
+                switch (keuze)
+                {
+                    case "L":
+                        ToonLijstVanLanden();
+
+                        break;
+                }
+
             }
 
             Console.Clear();
+            //}
+            //catch(SqlException ex)
+            //{
+            //    Console.WriteLine("Database is niet gevonden");
+            //    Console.WriteLine(ex.Message);
+            //    Console.Read();
+            //} 
         }
 
         public static void ToonLijstVanLanden()
         {
-            using var context = new EFLandenContext();
-
-            var landen = (from land in context.Landen
-                          orderby land.Naam
-                          select land).ToList();
-
-            if (landen != null)
+            try
             {
-                Console.WriteLine("----------------");
-                Console.WriteLine("Lijst van Landen");
-                Console.WriteLine("----------------");
+                using var context = new EFLandenContext();
 
-                foreach (var land in landen)
+                var landen = (from land in context.Landen
+                              orderby land.Naam
+                              select land).ToList();
+
+                if (landen != null)
                 {
-                    Console.WriteLine("{0}\t{1,-20}\t{2,20}\t{3,15}", land.ISOLandCode, land.Naam, land.AantalInwoners, land.Oppervlakte);
+                    Console.WriteLine("----------------");
+                    Console.WriteLine("Lijst van Landen");
+                    Console.WriteLine("----------------");
+
+                    foreach (var land in landen)
+                    {
+                        Console.WriteLine("{0}\t{1,-20}\t{2,20}\t{3,15}", land.ISOLandCode, land.Naam, land.AantalInwoners, land.Oppervlakte);
+                    }
+                }
+
+                Console.WriteLine();
+                Console.WriteLine("Geef een landcode in : ");
+                string landcode = Console.ReadLine().ToUpper();
+
+                if (landcode != null)
+                {
+                    KiesLandDoorLandcode(landcode);
+                }
+                else
+                {
+                    Console.WriteLine("Geef een geldig Landcode in");
                 }
             }
-
-            Console.WriteLine();
-            Console.WriteLine("Geef een landcode in : ");
-            string landcode = Console.ReadLine().ToUpper();
-
-            if (landcode != null)
+            catch (SqlException ex)
             {
-                KiesLandDoorLandcode(landcode);
-            }
-            else
-            {
-                Console.WriteLine("Geef een geldig Landcode in");
+                Console.WriteLine("Database is niet gevonden");
+                Console.WriteLine(ex.Message);
+                Console.Read();
             }
 
         }
 
         public static void KiesLandDoorLandcode(string landcode)
         {
-            using var context = new EFLandenContext();
-
-            var land = context.Landen.Where(b => b.ISOLandCode == landcode).FirstOrDefault();
-
-            if (land != null)
+            try
             {
-                Console.WriteLine();
-                Console.WriteLine("--------");
-                Console.WriteLine($"M E N U - {land.Naam}");
-                Console.WriteLine("--------");
-                Console.WriteLine("Lijst <L>anden");
-                Console.WriteLine("<W>ijzig Land");
-                Console.WriteLine("Lijst <S>teden");
-                Console.WriteLine("Lijst T<A>len");
-                Console.WriteLine("Stad <T>oevoegen");
-                Console.WriteLine("Stad <V>erwijderen");
-                Console.WriteLine("e<X>it");
-                Console.WriteLine();
+                using var context = new EFLandenContext();
 
-                Console.Write("\tGeef uw keuze (LWSATVX)* : ");
-                string keuze = Console.ReadLine().ToUpper();
+                var land = context.Landen.Where(b => b.ISOLandCode == landcode).FirstOrDefault();
 
-                switch (keuze)
+                if (land != null)
                 {
-                    case "L":
-                        ToonLijstVanLanden();
-                        break;
+                    Console.WriteLine();
+                    Console.WriteLine("--------");
+                    Console.WriteLine($"M E N U - {land.Naam}");
+                    Console.WriteLine("--------");
+                    Console.WriteLine("Lijst <L>anden");
+                    Console.WriteLine("<W>ijzig Land");
+                    Console.WriteLine("Lijst <S>teden");
+                    Console.WriteLine("Lijst T<A>len");
+                    Console.WriteLine("Stad <T>oevoegen");
+                    Console.WriteLine("Stad <V>erwijderen");
+                    Console.WriteLine("e<X>it");
+                    Console.WriteLine();
 
-                    case "W":
-                        WijzigenLand(landcode);
-                        break;
+                    Console.Write("\tGeef uw keuze (LWSATVX)* : ");
+                    string keuze = Console.ReadLine().ToUpper();
 
-                    case "S":
-                        ToonLijstVanSteden(landcode);
-                        break;
+                    switch (keuze)
+                    {
+                        case "L":
+                            ToonLijstVanLanden();
+                            break;
 
-                    case "A":
-                        ToonLijstVanTalen(landcode);
-                        break;
+                        case "W":
+                            WijzigenLand(landcode);
+                            break;
 
-                    case "T":
-                        ToevoegenSteden(landcode);
-                        break;
+                        case "S":
+                            ToonLijstVanSteden(landcode);
+                            break;
 
-                    case "V":
-                        VerwijderenSteden(landcode);
-                        break;
+                        case "A":
+                            ToonLijstVanTalen(landcode);
+                            break;
+
+                        case "T":
+                            ToevoegenSteden(landcode);
+                            break;
+
+                        case "V":
+                            VerwijderenSteden(landcode);
+                            break;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Land niet gevonden");
                 }
             }
-            else
+            catch (SqlException ex)
             {
-                Console.WriteLine("Land niet gevonden");
+                Console.WriteLine("Database is niet gevonden");
+                Console.WriteLine(ex.Message);
+                Console.Read();
             }
+
         }
 
         public static void ToonLijstVanSteden(string landcode)
         {
-            using var context = new EFLandenContext();
-
-            var steden = context.Steden.Where(b => b.ISOLandCode == landcode).ToList();
-
-            if (steden != null)
+            try
             {
-                Console.WriteLine();
-                Console.WriteLine("----------------");
-                Console.WriteLine("Lijst van Steden");
-                Console.WriteLine("----------------");
+                using var context = new EFLandenContext();
 
-                foreach (var stad in steden)
+                var steden = context.Steden.Where(b => b.ISOLandCode == landcode).ToList();
+
+                if (steden != null)
                 {
-                    Console.WriteLine(stad.Naam);
-                }
-            }
-            else
-            {
-                Console.WriteLine("Steden niet gevonden");
-            }
+                    Console.WriteLine();
+                    Console.WriteLine("----------------");
+                    Console.WriteLine("Lijst van Steden");
+                    Console.WriteLine("----------------");
 
-            KiesLandDoorLandcode(landcode);
+                    foreach (var stad in steden)
+                    {
+                        Console.WriteLine(stad.Naam);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Steden niet gevonden");
+                }
+
+                KiesLandDoorLandcode(landcode);
+            }
+            catch (SqlException ex)
+            {
+                Console.WriteLine("Database is niet gevonden");
+                Console.WriteLine(ex.Message);
+                Console.Read();
+            }
         }
 
         public static void ToonLijstVanTalen(string landcode)
         {
-            using var context = new EFLandenContext();
-
-            var talen = (from taal in context.LandenTalen.Include("Taal")
-                         where taal.LandCode == landcode
-                         select taal).ToList();
-
-            if (talen != null)
+            try
             {
-                Console.WriteLine();
-                Console.WriteLine("----------------");
-                Console.WriteLine("Lijst van Talen");
-                Console.WriteLine("----------------");
+                using var context = new EFLandenContext();
 
-                foreach (var taal in talen)
+                var talen = (from taal in context.LandenTalen.Include("Taal")
+                             where taal.LandCode == landcode
+                             select taal).ToList();
+
+                if (talen != null)
                 {
-                    Console.WriteLine($"{taal.Taal.ISOTaalCode} \t{taal.Taal.NaamNL}");
+                    Console.WriteLine();
+                    Console.WriteLine("----------------");
+                    Console.WriteLine("Lijst van Talen");
+                    Console.WriteLine("----------------");
+
+                    foreach (var taal in talen)
+                    {
+                        Console.WriteLine($"{taal.Taal.ISOTaalCode} \t{taal.Taal.NaamNL}");
+                    }
                 }
+                else
+                {
+                    Console.WriteLine("Talen niet gevonden");
+                }
+
+                KiesLandDoorLandcode(landcode);
             }
-            else
+            catch (SqlException ex)
             {
-                Console.WriteLine("Talen niet gevonden");
+                Console.WriteLine("Database is niet gevonden");
+                Console.WriteLine(ex.Message);
+                Console.Read();
             }
 
-            KiesLandDoorLandcode(landcode);
         }
 
         static void WijzigenLand(string landcode)
         {
-            using var context = new EFLandenContext();
-
-            var land = context.Landen.Find(landcode);
-
-            if (land != null)
+            try
             {
-                Console.WriteLine();
-                Console.WriteLine($"Gegevens land {land.Naam} :");
-                Console.WriteLine($"\tAantal inwoners:  \t{land.AantalInwoners}");
-                Console.WriteLine($"\tOppervlakte:      \t{land.Oppervlakte}");
-                Console.WriteLine();
+                using var context = new EFLandenContext();
 
-                Console.WriteLine("Wijzig aantal inwoners :");
-                if (int.TryParse(Console.ReadLine(), out int inwoners))
+                var land = context.Landen.Find(landcode);
+
+                if (land != null)
                 {
-                    land.AantalInwoners = inwoners;
-                    context.SaveChanges();
+                    Console.WriteLine();
+                    Console.WriteLine($"Gegevens land {land.Naam} :");
+                    Console.WriteLine($"\tAantal inwoners:  \t{land.AantalInwoners}");
+                    Console.WriteLine($"\tOppervlakte:      \t{land.Oppervlakte}");
+                    Console.WriteLine();
+
+                    Console.WriteLine("Wijzig aantal inwoners :");
+                    if (int.TryParse(Console.ReadLine(), out int inwoners))
+                    {
+                        land.AantalInwoners = inwoners;
+                        context.SaveChanges();
+                    }
+                    else
+                    {
+                        Console.WriteLine("niet wijzigen");
+                    }
+
+                    Console.WriteLine();
+                    Console.WriteLine("Wijzig aantal oppervlakte :");
+                    if (float.TryParse(Console.ReadLine(), out float oppervlakte))
+                    {
+                        land.Oppervlakte = oppervlakte;
+                        context.SaveChanges();
+                    }
+                    else
+                    {
+                        Console.WriteLine("niet wijzigen");
+                    }
                 }
                 else
                 {
-                    Console.WriteLine("niet wijzigen");
+                    Console.WriteLine("Landen niet gevonden");
                 }
 
-                Console.WriteLine();
-                Console.WriteLine("Wijzig aantal oppervlakte :");
-                if (float.TryParse(Console.ReadLine(), out float oppervlakte))
-                {
-                    land.Oppervlakte = oppervlakte;
-                    context.SaveChanges();
-                }
-                else
-                {
-                    Console.WriteLine("niet wijzigen");
-                }
+                KiesLandDoorLandcode(landcode);
             }
-            else
+            catch (SqlException ex)
             {
-                Console.WriteLine("Landen niet gevonden");
+                Console.WriteLine("Database is niet gevonden");
+                Console.WriteLine(ex.Message);
+                Console.Read();
             }
-
-            KiesLandDoorLandcode(landcode);
         }
 
         static void ToevoegenSteden(string landcode)
         {
-            using var context = new EFLandenContext();
-
-            var land = context.Landen.Find(landcode);
-
-            if (land != null)
+            try
             {
-                Console.WriteLine();
-                Console.WriteLine("Geef de naam van een nieuwe stad :");
-                var stadNaam = Console.ReadLine();
+                using var context = new EFLandenContext();
 
-                if (stadNaam != null)
+                var land = context.Landen.Find(landcode);
+
+                if (land != null)
                 {
-                    var stad = new Stad { Naam = stadNaam };
+                    Console.WriteLine();
+                    Console.WriteLine("Geef de naam van een nieuwe stad :");
+                    var stadNaam = Console.ReadLine();
 
-                    land.Steden.Add(stad);
-                    context.SaveChanges();
+                    if (stadNaam != null)
+                    {
+                        var stad = new Stad { Naam = stadNaam };
+
+                        land.Steden.Add(stad);
+                        context.SaveChanges();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Tik een stad");
+                    }
                 }
                 else
                 {
-                    Console.WriteLine("Tik een stad");
+                    Console.WriteLine("Landen niet gevonden");
                 }
-            }
-            else
-            {
-                Console.WriteLine("Landen niet gevonden");
-            }
 
-            KiesLandDoorLandcode(landcode);
+                KiesLandDoorLandcode(landcode);
+            }
+            catch (SqlException ex)
+            {
+                Console.WriteLine("Database is niet gevonden");
+                Console.WriteLine(ex.Message);
+                Console.Read();
+            }
         }
 
         static void VerwijderenSteden(string landcode)
         {
-            using var context = new EFLandenContext();
-
-            var steden = context.Steden.Where(b => b.ISOLandCode == landcode).ToList();
-
-            if (steden != null)
+            try
             {
-                Console.WriteLine();
-                Console.WriteLine("Kies de naam van een stad");
-                Console.WriteLine("----------------------------------");
+                using var context = new EFLandenContext();
 
-                foreach (var stad in steden)
+                var steden = context.Steden.Where(b => b.ISOLandCode == landcode).ToList();
+
+                if (steden != null)
                 {
-                    Console.WriteLine($"{stad.StadId} \t{stad.Naam}");
-                }
+                    Console.WriteLine();
+                    Console.WriteLine("Kies de naam van een stad");
+                    Console.WriteLine("----------------------------------");
 
-                Console.WriteLine("Geef het volgnummer uit de lijst : ");
-                if (int.TryParse(Console.ReadLine(), out int stadId))
-                {
-                    var stad = context.Steden.Find(stadId);
-
-                    if (stad != null && stad.ISOLandCode == landcode)
+                    foreach (var stad in steden)
                     {
-                        context.Steden.Remove(stad);
-                        context.SaveChanges();
-                        Console.WriteLine($"Verwijderen van stad {stad.Naam}");
+                        Console.WriteLine($"{stad.StadId} \t{stad.Naam}");
                     }
-                    else
+
+                    Console.WriteLine("Geef het volgnummer uit de lijst : ");
+                    if (int.TryParse(Console.ReadLine(), out int stadId))
                     {
-                        Console.WriteLine("Stad niet gevonden");
+                        var stad = context.Steden.Find(stadId);
+
+                        if (stad != null && stad.ISOLandCode == landcode)
+                        {
+                            context.Steden.Remove(stad);
+                            context.SaveChanges();
+                            Console.WriteLine($"Verwijderen van stad {stad.Naam}");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Stad niet gevonden");
+                        }
                     }
                 }
+                KiesLandDoorLandcode(landcode);
             }
-            KiesLandDoorLandcode(landcode);
+            catch (SqlException ex)
+            {
+                Console.WriteLine("Database is niet gevonden");
+                Console.WriteLine(ex.Message);
+                Console.Read();
+            }
         }
     }
 }
